@@ -1,0 +1,123 @@
+<form onsubmit="return false;">
+
+
+
+   <div class="form-row">
+   	<h3>Datos del nuevo template view</h3>
+   </div>
+	<fieldset>
+		<legend>Origin</legend>
+
+		<div class="form-row">
+		<select id="project-origin-bundle-select">
+			<option value="-1"> Choose Bundle</option>
+			<?php 
+
+			foreach ($bundles as $value) {
+				echo "<option> $value </option>";
+			}
+
+			?>
+		</select>
+	</div>
+
+
+		<div class="form-row">
+		<select disabled="" id="project-origin-model-select" >
+			<option> Choose model template</option>			
+		</select>
+
+
+	</div>
+	</fieldset>
+
+	<fieldset>
+		<legend>Target</legend>
+		<div class="form-row">
+		<select id="project-target-bundle-select">
+			<option> Choose Bundle</option>
+			<?php 
+
+			foreach ($bundles as $value) {
+				echo "<option> $value </option>";
+			}
+
+			?>
+		</select>
+	</div>
+
+	<div class="form-row">
+		<select id="project-target-view-template-select">
+			<option> Choose view template</option>
+			<?php 
+
+			foreach ($templates as $value) {
+				echo "<option> $value </option>";
+			}
+
+			?>
+		</select>
+	</div>
+
+	<div class="form-row">
+		<input id="template-text-filename" type="text" placeholder="List.html.twig">
+	</div>
+
+
+	</fieldset>
+
+	
+
+	<div class="form-row">
+		<button id="create-view-btn">Crear</button>
+	</div>
+
+</form>
+
+<script type="text/javascript">
+	$(function(){
+		$("#create-view-btn").click(function(){
+			
+			var FormData = {};
+			var originBundle = $("select#project-origin-bundle-select").val();
+			var originBundleModel = $("select#project-origin-model-select").val();
+
+			originBundleModel = originBundleModel.split(".")[0]
+
+			var targetBundle = $("select#project-target-bundle-select").val();
+			var targetViewTemplate = $("select#project-target-view-template-select").val();
+			var templateFilename = $("#template-text-filename").val();
+
+			FormData = {
+				originBundle :originBundle,
+				originBundleModel :originBundleModel,
+				targetBundle :targetBundle,
+				targetViewTemplate :targetViewTemplate,
+				templateFilename :templateFilename,
+			}
+
+           $.post("action?name=createViewTemplate",FormData)
+           .done(function(rs){
+           	  alert(rs.message)
+           });
+		});
+
+		$("#project-origin-bundle-select").change(function(){
+			var bundleName = $(this).val();
+			
+			if(bundleName == -1) return;
+           $.get("action?name=loadProjectModels&bundle=" + bundleName)
+           .done(function(rs){
+           	$("option.varible-options").remove();
+             	rs.forEach(function(item){
+                 $("#project-origin-model-select").append("<option class='varible-options'>" + item + "</option>");
+             	});
+                $("#project-origin-model-select").removeAttr("disabled");
+           })
+           .fail(function(err){
+           	alert(err.responseJSON.error.message)
+           })
+           
+		});
+	})
+</script>
